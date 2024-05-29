@@ -1,40 +1,382 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Fullscreen</title>
+    <title>WebTV</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet">
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-        iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <iframe id="videoFrame" src="https://drive.google.com/file/d/1QvXYVo6Oxm98-Z4wUcdWzjigSQ7Svhsa/preview" allow="autoplay; fullscreen"></iframe>
+    <div id="player-container">
+        <video id="video-player" class="video-js vjs-default-skin" controls autoplay>
+            <source id="video-source" src="channel1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div id="channel-list">
+        <ul>
+            <li data-src="https://stream.ichibantv.com:3764/hybrid/play.m3u8" data-type="m3u8" data-channel="nick-classicos">
+                <img src="logo1.png" alt="Nick Classicos">
+                <div class="channel-info">
+                    <div class="channel-title">geekdot</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://drive.google.com/file/d/1alI2YnU9YvxZa5JNeFm07ZOwfOf-tROe/preview" data-type="iframe" data-channel="google-drive-video">
+                <img src="logo15.png" alt="Google Drive Video">
+                <div class="channel-info">
+                    <div class="channel-title">Google Drive Video</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://service-stitcher.clusters.pluto.tv/v1/stitch/embed/hls/channel/5f12151794c1800007a8ae63/master.m3u8" data-type="m3u8" data-channel="nick-classicos">
+                <img src="logo1.png" alt="Nick Classicos">
+                <div class="channel-info">
+                    <div class="channel-title">Nick Classicos</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stream.ichibantv.com:3764/hybrid/play.m3u8" data-type="m3u8" data-channel="geekdot">
+                <img src="logo1.png" alt="Geekdot">
+                <div class="channel-info">
+                    <div class="channel-title">Geekdot</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/loadingtv/loadingtv/playlist.m3u8" data-type="m3u8" data-channel="loading-tv">
+                <img src="logo2.png" alt="Loading TV">
+                <div class="channel-info">
+                    <div class="channel-title">Loading TV</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/emlsilva/emlsilva/playlist.m3u8" data-type="m3u8" data-channel="fox-kids">
+                <img src="logo3.png" alt="Fox Kids">
+                <div class="channel-info">
+                    <div class="channel-title">Fox Kids</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://tv02.zas.media:1936/wordingtv/wordingtv/playlist.m3u8" data-type="m3u8" data-channel="wording-tv">
+                <img src="logo4.png" alt="Wording TV">
+                <div class="channel-info">
+                    <div class="channel-title">Wording TV</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/animetv/animetv/playlist.m3u8" data-type="m3u8" data-channel="anime-tv">
+                <img src="logo5.png" alt="Anime TV">
+                <div class="channel-info">
+                    <div class="channel-title">Anime TV</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://video07.logicahost.com.br/redebrasil/redebrasil/playlist.m3u8" data-type="m3u8" data-channel="rede-brasil">
+                <img src="logo6.png" alt="Rede Brasil">
+                <div class="channel-info">
+                    <div class="channel-title">Rede Brasil</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://service-stitcher.clusters.pluto.tv/v1/stitch/embed/hls/channel/62545c0b002f4b0007688b61/master.m3u8?advertisingId={PSID}&appVersion=unknown&deviceDNT={TARGETOPT}&deviceId={PSID}&deviceLat=0&deviceLon=0&deviceMake=samsung&deviceModel=samsung&deviceType=samsung-tvplus&deviceVersion=unknown" data-type="m3u8" data-channel="bob-esponja">
+                <img src="logo6.png" alt="Bob Esponja">
+                <div class="channel-info">
+                    <div class="channel-title">Bob Esponja</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://service-stitcher.clusters.pluto.tv/v1/stitch/embed/hls/channel/63221e41af69b500076f84e7/master.m3u8?deviceId=channel&deviceModel=web&deviceVersion=1.0&appVersion=1.0&deviceType=rokuChannel&deviceMake=rokuChannel&deviceDNT=18" data-type="m3u8" data-channel="os-padrinhos-magicos">
+                <img src="logo6.png" alt="Os Padrinhos Mágicos">
+                <div class="channel-info">
+                    <div class="channel-title">Os Padrinhos Mágicos</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/retrotv/retrotv/playlist.m3u8" data-type="m3u8" data-channel="desenho-retro">
+                <img src="logo7.png" alt="Desenho Retro">
+                <div class="channel-info">
+                    <div class="channel-title">Desenho Retro</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/xtremetv/xtremetv/playlist.m3u8" data-type="m3u8" data-channel="tv-extreme">
+                <img src="logo8.png" alt="TV Extreme">
+                <div class="channel-info">
+                    <div class="channel-title">TV Extreme</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.conectastreaming.com/hitstv/hitstv/playlist.m3u8" data-type="m3u8" data-channel="cinepix-filmes-e-series">
+                <img src="logo9.png" alt="Cinepix Filmes e Séries">
+                <div class="channel-info">
+                    <div class="channel-title">Cinepix Filmes e Séries</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://ythlsgo.onrender.com/channel/UCsRfBAspa72ExrsN347W2xg.m3u8" data-type="m3u8" data-channel="sbt-rio">
+                <img src="logo10.png" alt="SBT Rio">
+                <div class="channel-info">
+                    <div class="channel-title">SBT Rio</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/tvserie/tvserie/playlist.m3u8" data-type="m3u8" data-channel="rede-manchete">
+                <img src="logo11.png" alt="Rede Manchete">
+                <div class="channel-info">
+                    <div class="channel-title">Rede Manchete</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/jetsontv/jetsontv/playlist.m3u8" data-type="m3u8" data-channel="os-jetsons-24h">
+                <img src="logo12.png" alt="Os Jetsons 24h">
+                <div class="channel-info">
+                    <div class="channel-title">Os Jetsons 24h</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://stmv1.srvif.com/otaku/otaku/playlist.m3u8" data-type="m3u8" data-channel="otaku-tv">
+                <img src="logo13.png" alt="Otaku TV">
+                <div class="channel-info">
+                    <div class="channel-title">Otaku TV</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            <li data-src="https://www.dailymotion.com/embed/video/x7wjrui?autoplay=1&queue-enable=false" data-type="iframe" data-channel="radio-89">
+                <img src="logo14.png" alt="Rádio 89">
+                <div class="channel-info">
+                    <div class="channel-title">Rádio 89</div>
+                    <span class="program-info"></span>
+                </div>
+            </li>
+            
+            <!-- other channels here -->
+        </ul>
+    </div>
+    <div id="epg">
+        <div id="epg-header">EPG Diário</div>
+        <ul id="epg-list">
+            <!-- Programações serão inseridas aqui dinamicamente -->
+        </ul>
+    </div>
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
     <script>
-        window.onload = function() {
-            setTimeout(function() {
-                var iframe = document.getElementById('videoFrame');
-                var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-                var playButton = innerDoc.querySelector('.drive-viewer-poster'); // Classe da imagem do símbolo de play
-                if (playButton) {
-                    playButton.click();
+        document.addEventListener('DOMContentLoaded', () => {
+            const playerContainer = document.getElementById('player-container');
+            const videoPlayer = document.getElementById('video-player');
+            const videoJsPlayer = videojs(videoPlayer, {
+                autoplay: true,
+                controls: true,
+                controlBar: {
+                    fadeIn: true,
+                    fadeOut: true
+                },
+                fluid: true // This ensures the video player is responsive
+            });
+
+            let currentPlayer = null;
+            let isGoogleDriveVideoSelected = false;
+
+            const channelList = document.getElementById('channel-list');
+            const channelItems = channelList.querySelectorAll('li');
+            const epg = document.getElementById('epg');
+            const epgList = document.getElementById('epg-list');
+            let currentIndex = 0;
+            let closeListTimeout;
+
+            const googleDriveVideos = [
+                { src: "https://drive.google.com/file/d/1alI2YnU9YvxZa5JNeFm07ZOwfOf-tROe/preview", duration: 6 * 60 + 26 },
+                { src: "https://drive.google.com/file/d/1rVsA1lMiPZ1y6zKLBycLzrSnJfKOXqLN/preview", duration: 2 * 60 + 50 },
+                { src: "https://drive.google.com/file/d/1QvXYVo6Oxm98-Z4wUcdWzjigSQ7Svhsa/preview", duration: 9 * 60 + 8 }
+            ];
+
+            const startTime = new Date("2024-05-28T11:10:00Z");
+
+            const updateVisualSelection = () => {
+                channelItems.forEach((item, index) => {
+                    if (index === currentIndex) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            };
+
+            const getCurrentVideo = () => {
+                const now = new Date();
+                const elapsedTime = Math.floor((now - startTime) / 1000); // Time elapsed in seconds
+                const totalDuration = googleDriveVideos.reduce((acc, video) => acc + video.duration, 0);
+                const loopTime = elapsedTime % totalDuration;
+                let currentTime = 0;
+
+                for (let video of googleDriveVideos) {
+                    currentTime += video.duration;
+                    if (loopTime < currentTime) {
+                        const startOffset = loopTime - (currentTime - video.duration);
+                        return { src: video.src, startOffset, duration: video.duration - startOffset };
+                    }
                 }
-            }, 2000); // Aguarda 2 segundos
-        }
+            };
+
+            const playGoogleDriveVideo = () => {
+                const currentVideo = getCurrentVideo();
+                playerContainer.innerHTML = `
+                    <iframe 
+                        id="current-video"
+                        src="${currentVideo.src}#t=${currentVideo.startOffset}" 
+                        width="100%" 
+                        height="100%" 
+                        allow="autoplay" 
+                        style="border:none;" 
+                        tabindex="0"></iframe>`;
+
+                currentPlayer = document.getElementById('current-video');
+                currentPlayer.focus(); // Set focus on iframe after loading
+            };
+
+            const updateVideoSource = () => {
+                const selectedItem = channelItems[currentIndex];
+                const newSrc = selectedItem.getAttribute('data-src');
+                const newType = selectedItem.getAttribute('data-type');
+
+                stopCurrentPlayer();
+
+                if (newType === 'm3u8') {
+                    playerContainer.innerHTML = '<video id="video-player" class="video-js vjs-default-skin" controls autoplay></video>';
+                    currentPlayer = document.getElementById('video-player');
+                    const videoJsPlayer = videojs(currentPlayer, {
+                        autoplay: true,
+                        controls: true,
+                        controlBar: {
+                            fadeIn: true,
+                            fadeOut: true
+                        },
+                        fluid: true
+                    });
+                    videoJsPlayer.src({ type: 'application/x-mpegURL', src: newSrc });
+                    videoJsPlayer.play();
+                    isGoogleDriveVideoSelected = false;
+                } else if (newType === 'iframe') {
+                    playGoogleDriveVideo();
+                    isGoogleDriveVideoSelected = true;
+                }
+            };
+
+            const stopCurrentPlayer = () => {
+                if (currentPlayer) {
+                    if (currentPlayer.tagName.toLowerCase() === 'video') {
+                        const videoJsPlayer = videojs(currentPlayer);
+                        videoJsPlayer.dispose();
+                    } else if (currentPlayer.tagName.toLowerCase() === 'iframe') {
+                        currentPlayer.remove();
+                    }
+                }
+            };
+
+            const startCloseListTimeout = () => {
+                clearTimeout(closeListTimeout);
+                closeListTimeout = setTimeout(() => {
+                    channelList.style.left = '-300px';
+                }, 4000);
+            };
+
+            const loadEPG = (channel) => {
+                fetch('epg.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        epgList.innerHTML = '';
+                        if (data[channel]) {
+                            data[channel].forEach(program => {
+                                const li = document.createElement('li');
+                                li.textContent = `${program.time} - ${program.title}`;
+                                epgList.appendChild(li);
+                            });
+                        } else {
+                            const li = document.createElement('li');
+                            li.textContent = 'No programming information available';
+                            epgList.appendChild(li);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching EPG data:', error));
+            };
+
+            const updateProgramInfo = () => {
+                fetch('epg.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        channelItems.forEach(item => {
+                            const channel = item.getAttribute('data-channel');
+                            const programInfoElement = item.querySelector('.program-info');
+                            if (data[channel] && data[channel].length > 0) {
+                                programInfoElement.textContent = data[channel][0].title;
+                            } else {
+                                programInfoElement.textContent = '';
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error fetching EPG data:', error));
+            };
+
+            updateVisualSelection();
+            updateProgramInfo();
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const selectedItem = channelItems[currentIndex];
+                    const selectedType = selectedItem.getAttribute('data-type');
+
+                    if (channelList.style.left === '0px') {
+                        updateVideoSource();
+                        channelList.style.left = '-300px';
+                    } else if (isGoogleDriveVideoSelected && document.activeElement === currentPlayer) {
+                        currentPlayer.focus(); // Ensure focus is on the iframe for play
+                        document.activeElement.blur(); // Remove focus to allow the iframe to receive input
+                        currentPlayer.contentWindow.document.querySelector('video').play();
+                        isGoogleDriveVideoSelected = false;
+                    } else {
+                        channelList.style.left = '0';
+                        startCloseListTimeout();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    if (channelList.style.left === '0px') {
+                        currentIndex = (currentIndex + 1) % channelItems.length;
+                        updateVisualSelection();
+                        startCloseListTimeout();
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    if (channelList.style.left === '0px') {
+                        currentIndex = (currentIndex - 1 + channelItems.length) % channelItems.length;
+                        updateVisualSelection();
+                        startCloseListTimeout();
+                    }
+                } else if (e.key === 'ArrowRight') {
+                    if (channelList.style.left === '0px') {
+                        epg.style.right = '0';
+                        const selectedChannel = channelItems[currentIndex].getAttribute('data-channel');
+                        loadEPG(selectedChannel);
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    if (epg.style.right === '0px') {
+                        epg.style.right = '-300px';
+                    }
+                }
+            });
+
+            channelItems.forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateVisualSelection();
+                    updateVideoSource();
+                });
+            });
+
+            channelList.addEventListener('mousemove', startCloseListTimeout);
+        });
     </script>
 </body>
 </html>
