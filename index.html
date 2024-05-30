@@ -172,217 +172,239 @@
         </ul>
     </div>
     <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const playerContainer = document.getElementById('player-container');
-            const videoPlayer = document.getElementById('video-player');
-            const videoJsPlayer = videojs(videoPlayer, {
-                autoplay: true,
-                controls: true,
-                controlBar: {
-                    fadeIn: true,
-                    fadeOut: true
-                },
-                fluid: true // This ensures the video player is responsive
-            });
-
-            let currentPlayer = null;
-            let isGoogleDriveVideoSelected = false;
-
-            const channelList = document.getElementById('channel-list');
-            const channelItems = channelList.querySelectorAll('li');
-            const epg = document.getElementById('epg');
-            const epgList = document.getElementById('epg-list');
-            let currentIndex = 0;
-            let closeListTimeout;
-
-            const googleDriveVideos = [
-                               { src: "https://drive.google.com/file/d/1Zy7aXALnQWiNJrJdiVN-iuikNsTw1uxP/preview", duration: 38500 }
-
-            ];
-
-            const startTime = new Date("2024-05-28T11:10:00Z");
-
-            const updateVisualSelection = () => {
-                channelItems.forEach((item, index) => {
-                    if (index === currentIndex) {
-                        item.classList.add('selected');
-                    } else {
-                        item.classList.remove('selected');
-                    }
-                });
-            };
-
-            const getCurrentVideo = () => {
-                const now = new Date();
-                const elapsedTime = Math.floor((now - startTime) / 1000); // Time elapsed in seconds
-                const totalDuration = googleDriveVideos.reduce((acc, video) => acc + video.duration, 0);
-                const loopTime = elapsedTime % totalDuration;
-                let currentTime = 0;
-
-                for (let video of googleDriveVideos) {
-                    currentTime += video.duration;
-                    if (loopTime < currentTime) {
-                        const startOffset = loopTime - (currentTime - video.duration);
-                        return { src: video.src, startOffset, duration: video.duration - startOffset };
-                    }
-                }
-            };
-
-            const playGoogleDriveVideo = () => {
-                const currentVideo = getCurrentVideo();
-                playerContainer.innerHTML = `
-                    <iframe 
-                        id="current-video"
-                        src="${currentVideo.src}#t=${currentVideo.startOffset}" 
-                        width="100%" 
-                        height="100%" 
-                        allow="autoplay" 
-                        style="border:none;" 
-                        tabindex="0"></iframe>`;
-
-                currentPlayer = document.getElementById('current-video');
-                currentPlayer.focus(); // Set focus on iframe after loading
-            };
-
-            const updateVideoSource = () => {
-                const selectedItem = channelItems[currentIndex];
-                const newSrc = selectedItem.getAttribute('data-src');
-                const newType = selectedItem.getAttribute('data-type');
-
-                stopCurrentPlayer();
-
-                if (newType === 'm3u8') {
-                    playerContainer.innerHTML = '<video id="video-player" class="video-js vjs-default-skin" controls autoplay></video>';
-                    currentPlayer = document.getElementById('video-player');
-                    const videoJsPlayer = videojs(currentPlayer, {
-                        autoplay: true,
-                        controls: true,
-                        controlBar: {
-                            fadeIn: true,
-                            fadeOut: true
-                        },
-                        fluid: true
-                    });
-                    videoJsPlayer.src({ type: 'application/x-mpegURL', src: newSrc });
-                    videoJsPlayer.play();
-                    isGoogleDriveVideoSelected = false;
-                } else if (newType === 'iframe') {
-                    playGoogleDriveVideo();
-                    isGoogleDriveVideoSelected = true;
-                }
-            };
-
-            const stopCurrentPlayer = () => {
-                if (currentPlayer) {
-                    if (currentPlayer.tagName.toLowerCase() === 'video') {
-                        const videoJsPlayer = videojs(currentPlayer);
-                        videoJsPlayer.dispose();
-                    } else if (currentPlayer.tagName.toLowerCase() === 'iframe') {
-                        currentPlayer.remove();
-                    }
-                }
-            };
-
-            const startCloseListTimeout = () => {
-                clearTimeout(closeListTimeout);
-                closeListTimeout = setTimeout(() => {
-                    channelList.style.left = '-300px';
-                }, 4000);
-            };
-
-            const loadEPG = (channel) => {
-                fetch('epg.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        epgList.innerHTML = '';
-                        if (data[channel]) {
-                            data[channel].forEach(program => {
-                                const li = document.createElement('li');
-                                li.textContent = `${program.time} - ${program.title}`;
-                                epgList.appendChild(li);
-                            });
-                        } else {
-                            const li = document.createElement('li');
-                            li.textContent = 'No programming information available';
-                            epgList.appendChild(li);
-                        }
-                    })
-                    .catch(error => console.error('Error fetching EPG data:', error));
-            };
-
-            const updateProgramInfo = () => {
-                fetch('epg.json')
-                    .then(response => response.json())
-                    .then(data => {
-                        channelItems.forEach(item => {
-                            const channel = item.getAttribute('data-channel');
-                            const programInfoElement = item.querySelector('.program-info');
-                            if (data[channel] && data[channel].length > 0) {
-                                programInfoElement.textContent = data[channel][0].title;
-                            } else {
-                                programInfoElement.textContent = '';
-                            }
-                        });
-                    })
-                    .catch(error => console.error('Error fetching EPG data:', error));
-            };
-
-            updateVisualSelection();
-            updateProgramInfo();
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    const selectedItem = channelItems[currentIndex];
-                    const selectedType = selectedItem.getAttribute('data-type');
-
-                    if (channelList.style.left === '0px') {
-                        updateVideoSource();
-                        channelList.style.left = '-300px';
-                    } else if (isGoogleDriveVideoSelected && document.activeElement === currentPlayer) {
-                        currentPlayer.focus(); // Ensure focus is on the iframe for play
-                        document.activeElement.blur(); // Remove focus to allow the iframe to receive input
-                        currentPlayer.contentWindow.document.querySelector('video').play();
-                        isGoogleDriveVideoSelected = false;
-                    } else {
-                        channelList.style.left = '0';
-                        startCloseListTimeout();
-                    }
-                } else if (e.key === 'ArrowDown') {
-                    if (channelList.style.left === '0px') {
-                        currentIndex = (currentIndex + 1) % channelItems.length;
-                        updateVisualSelection();
-                        startCloseListTimeout();
-                    }
-                } else if (e.key === 'ArrowUp') {
-                    if (channelList.style.left === '0px') {
-                        currentIndex = (currentIndex - 1 + channelItems.length) % channelItems.length;
-                        updateVisualSelection();
-                        startCloseListTimeout();
-                    }
-                } else if (e.key === 'ArrowRight') {
-                    if (channelList.style.left === '0px') {
-                        epg.style.right = '0';
-                        const selectedChannel = channelItems[currentIndex].getAttribute('data-channel');
-                        loadEPG(selectedChannel);
-                    }
-                } else if (e.key === 'ArrowLeft') {
-                    if (epg.style.right === '0px') {
-                        epg.style.right = '-300px';
-                    }
-                }
-            });
-
-            channelItems.forEach((item, index) => {
-                item.addEventListener('click', () => {
-                    currentIndex = index;
-                    updateVisualSelection();
-                    updateVideoSource();
-                });
-            });
-
-            channelList.addEventListener('mousemove', startCloseListTimeout);
+<script>
+    // Evento que é disparado quando o conteúdo da página é carregado
+    document.addEventListener('DOMContentLoaded', () => {
+        // Seleciona os elementos do DOM que serão usados no script
+        const playerContainer = document.getElementById('player-container');
+        const videoPlayer = document.getElementById('video-player');
+        
+        // Configura o player de vídeo usando a biblioteca Video.js
+        const videoJsPlayer = videojs(videoPlayer, {
+            autoplay: true,
+            controls: true,
+            controlBar: {
+                fadeIn: true,
+                fadeOut: true
+            },
+            fluid: true // Garante que o player de vídeo seja responsivo
         });
-    </script>
+
+        let currentPlayer = null;
+        let isGoogleDriveVideoSelected = false;
+
+        // Lista de canais e vídeos
+        const channelList = document.getElementById('channel-list');
+        const channelItems = channelList.querySelectorAll('li');
+        const epg = document.getElementById('epg');
+        const epgList = document.getElementById('epg-list');
+        let currentIndex = 0;
+        let closeListTimeout;
+
+        // Lista de vídeos do Google Drive
+        const googleDriveVideos = [
+            { src: "https://drive.google.com/file/d/1Zy7aXALnQWiNJrJdiVN-iuikNsTw1uxP/preview", duration: 38500 }
+        ];
+
+        // Define a hora de início dos vídeos
+        const startTime = new Date("2024-05-28T11:10:00Z");
+
+        // Atualiza a seleção visual dos canais
+        const updateVisualSelection = () => {
+            channelItems.forEach((item, index) => {
+                if (index === currentIndex) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        };
+
+        // Obtém o vídeo atual com base no tempo decorrido desde o início
+        const getCurrentVideo = () => {
+            const now = new Date();
+            const elapsedTime = Math.floor((now - startTime) / 1000); // Tempo decorrido em segundos
+            const totalDuration = googleDriveVideos.reduce((acc, video) => acc + video.duration, 0);
+            const loopTime = elapsedTime % totalDuration;
+            let currentTime = 0;
+
+            for (let video of googleDriveVideos) {
+                currentTime += video.duration;
+                if (loopTime < currentTime) {
+                    const startOffset = loopTime - (currentTime - video.duration);
+                    return { src: video.src, startOffset, duration: video.duration - startOffset };
+                }
+            }
+        };
+
+        // Reproduz o vídeo do Google Drive
+        const playGoogleDriveVideo = () => {
+            const currentVideo = getCurrentVideo();
+            playerContainer.innerHTML = `
+                <iframe 
+                    id="current-video"
+                    src="${currentVideo.src}#t=${currentVideo.startOffset}" 
+                    width="100%" 
+                    height="100%" 
+                    allow="autoplay" 
+                    style="border:none;" 
+                    tabindex="0"></iframe>`;
+
+            currentPlayer = document.getElementById('current-video');
+            currentPlayer.focus(); // Define o foco no iframe após o carregamento
+        };
+
+        // Atualiza a fonte do vídeo com base na seleção do canal
+        const updateVideoSource = () => {
+            const selectedItem = channelItems[currentIndex];
+            const newSrc = selectedItem.getAttribute('data-src');
+            const newType = selectedItem.getAttribute('data-type');
+
+            stopCurrentPlayer();
+
+            if (newType === 'm3u8') {
+                playerContainer.innerHTML = '<video id="video-player" class="video-js vjs-default-skin" controls autoplay></video>';
+                currentPlayer = document.getElementById('video-player');
+                const videoJsPlayer = videojs(currentPlayer, {
+                    autoplay: true,
+                    controls: true,
+                    controlBar: {
+                        fadeIn: true,
+                        fadeOut: true
+                    },
+                    fluid: true
+                });
+                videoJsPlayer.src({ type: 'application/x-mpegURL', src: newSrc });
+                videoJsPlayer.play();
+                isGoogleDriveVideoSelected = false;
+            } else if (newType === 'iframe') {
+                playGoogleDriveVideo();
+                isGoogleDriveVideoSelected = true;
+            }
+        };
+
+        // Para o player atual
+        const stopCurrentPlayer = () => {
+            if (currentPlayer) {
+                if (currentPlayer.tagName.toLowerCase() === 'video') {
+                    const videoJsPlayer = videojs(currentPlayer);
+                    videoJsPlayer.dispose();
+                } else if (currentPlayer.tagName.toLowerCase() === 'iframe') {
+                    currentPlayer.remove();
+                }
+            }
+        };
+
+        // Inicia o tempo limite para fechar a lista de canais
+        const startCloseListTimeout = () => {
+            clearTimeout(closeListTimeout);
+            closeListTimeout = setTimeout(() => {
+                channelList.style.left = '-300px';
+            }, 4000);
+        };
+
+        // Carrega a programação EPG para o canal selecionado
+        const loadEPG = (channel) => {
+            fetch('epg.json')
+                .then(response => response.json())
+                .then(data => {
+                    epgList.innerHTML = '';
+                    if (data[channel]) {
+                        data[channel].forEach(program => {
+                            const li = document.createElement('li');
+                            li.textContent = `${program.time} - ${program.title}`;
+                            epgList.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = 'No programming information available';
+                        epgList.appendChild(li);
+                    }
+                })
+                .catch(error => console.error('Error fetching EPG data:', error));
+        };
+
+        // Atualiza as informações do programa
+        const updateProgramInfo = () => {
+            fetch('epg.json')
+                .then(response => response.json())
+                .then(data => {
+                    channelItems.forEach(item => {
+                        const channel = item.getAttribute('data-channel');
+                        const programInfoElement = item.querySelector('.program-info');
+                        if (data[channel] && data[channel].length > 0) {
+                            programInfoElement.textContent = data[channel][0].title;
+                        } else {
+                            programInfoElement.textContent = '';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching EPG data:', error));
+        };
+
+        // Atualiza a seleção visual e as informações do programa ao carregar
+        updateVisualSelection();
+        updateProgramInfo();
+
+        // Função para abrir o menu de canais
+        const openChannelMenu = () => {
+            if (channelList.style.left === '0px') {
+                updateVideoSource();
+                channelList.style.left = '-300px';
+            } else if (isGoogleDriveVideoSelected && document.activeElement === currentPlayer) {
+                currentPlayer.focus(); // Garante que o foco está no iframe para reproduzir
+                document.activeElement.blur(); // Remove o foco para permitir que o iframe receba entrada
+                currentPlayer.contentWindow.document.querySelector('video').play();
+                isGoogleDriveVideoSelected = false;
+            } else {
+                channelList.style.left = '0';
+                startCloseListTimeout();
+            }
+        };
+
+        // Eventos de teclado para navegar e selecionar canais
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === 'Backspace') {
+                openChannelMenu();
+            } else if (e.key === 'ArrowDown') {
+                if (channelList.style.left === '0px') {
+                    currentIndex = (currentIndex + 1) % channelItems.length;
+                    updateVisualSelection();
+                    startCloseListTimeout();
+                }
+            } else if (e.key === 'ArrowUp') {
+                if (channelList.style.left === '0px') {
+                    currentIndex = (currentIndex - 1 + channelItems.length) % channelItems.length;
+                    updateVisualSelection();
+                    startCloseListTimeout();
+                }
+            } else if (e.key === 'ArrowRight') {
+                if (channelList.style.left === '0px') {
+                    epg.style.right = '0';
+                    const selectedChannel = channelItems[currentIndex].getAttribute('data-channel');
+                    loadEPG(selectedChannel);
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (epg.style.right === '0px') {
+                    epg.style.right = '-300px';
+                }
+            }
+        });
+
+        // Evento de clique para selecionar canais
+        channelItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                currentIndex = index;
+                updateVisualSelection();
+                updateVideoSource();
+            });
+        });
+
+        // Evento de movimento do mouse para reiniciar o tempo limite para fechar a lista de canais
+        channelList.addEventListener('mousemove', startCloseListTimeout);
+    });
+</script>
+
+    
 </body>
 </html>
