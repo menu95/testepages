@@ -5,7 +5,7 @@ body, html {
     height: 100%;
     overflow: hidden;
     background-color: black;
-    font-family: Arial, sans-serif; /* Change the font */
+    font-family: Arial, sans-serif;
     color: white;
 }
 
@@ -29,14 +29,14 @@ body, html {
 #channel-list {
     position: fixed;
     top: 0;
-    left: -300px; /* Hidden initially */
+    left: -300px;
     width: 300px;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
-    overflow-y: auto;
+    overflow-y: hidden; /* Hide scroll bar */
     transition: left 0.1s;
-    font-size: 16px; /* Change the font size */
+    font-size: 16px;
 }
 
 #channel-list ul {
@@ -80,7 +80,7 @@ body, html {
 #epg {
     position: fixed;
     top: 0;
-    right: -300px; /* Hidden initially */
+    right: -300px;
     width: 300px;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.8);
