@@ -290,7 +290,7 @@
         </ul>
     </div>
     <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
-<script>
+<!-- <script>
     // Evento que é disparado quando o conteúdo da página é carregado
     document.addEventListener('DOMContentLoaded', () => {
         // Seleciona os elementos do DOM que serão usados no script
@@ -316,7 +316,7 @@
         const channelItems = channelList.querySelectorAll('li');
         const epg = document.getElementById('epg');
         const epgList = document.getElementById('epg-list');
-        //let currentIndex = 0;  ------------------------------------------------------------------------------------------------------------------------------teste de correção
+        let currentIndex = 0; 
         let closeListTimeout;
 
         // Lista de vídeos do Google Drive
@@ -535,7 +535,266 @@
         // Evento de movimento do mouse para reiniciar o tempo limite para fechar a lista de canais
         channelList.addEventListener('mousemove', startCloseListTimeout);
     });
+</script> -->
+
+
+
+<!-- tag script teste
+ -->
+
+
+
+    <script>
+    // Evento que é disparado quando o conteúdo da página é carregado
+    document.addEventListener('DOMContentLoaded', () => {
+        // Seleciona os elementos do DOM que serão usados no script
+        const playerContainer = document.getElementById('player-container');
+        const videoPlayer = document.getElementById('video-player');
+        
+        // Configura o player de vídeo usando a biblioteca Video.js
+        const videoJsPlayer = videojs(videoPlayer, {
+            autoplay: true,
+            controls: true,
+            controlBar: {
+                fadeIn: true,
+                fadeOut: true
+            },
+            fluid: true // Garante que o player de vídeo seja responsivo
+        });
+
+        let currentPlayer = null;
+        let isGoogleDriveVideoSelected = false;
+        let currentIndex = 0; // Inicializa o índice atual
+
+        // Lista de canais e vídeos
+        const channelList = document.getElementById('channel-list');
+        const channelItems = channelList.querySelectorAll('li');
+        const epg = document.getElementById('epg');
+        const epgList = document.getElementById('epg-list');
+        let closeListTimeout;
+
+        // Lista de vídeos do Google Drive
+        const googleDriveVideos = [
+            { src: "https://drive.google.com/file/d/1app5Yc_gE8uo-9VDnfqR6slB0o0HCBzs/preview", duration: 7 * 3600 + 49 * 60 + 53 }, // 7:49:53, temporada 8 completa
+            { src: "https://drive.google.com/file/d/18-w4L94B7aEIHDYHMPFr-wz_euZkEqWe/preview", duration: 2 * 3600 + 50 * 56 }, // 2:50:56, temporada 9 primeira parte
+            { src: "https://drive.google.com/file/d/1_CQNG7tw7V4Tw09ML20KP3Iqa-IFyOha/preview", duration: 4 * 3600 + 47 * 60 + 5 }, // 4:47:05, temporada 9 segunda parte
+            { src: "https://drive.google.com/file/d/19lGmzpzCPRLfUpq4OzkyGE_pQTbdl5nA/preview", duration: 3 * 3600 + 33 * 60 + 32 }, // 3:33:32, temporada 10 primeira parte
+            { src: "https://drive.google.com/file/d/1mTtAYUw9kBzJxc4IboYuS1xpr0NLzwG8/preview", duration: 4 * 3600 + 6 * 60 + 53 }, // 4:06:53, temporada 10 segunda parte
+            { src: "https://drive.google.com/file/d/1JEkFZ3LSV8bQz0BBW4okPj_ELOD6JfJK/preview", duration: 1 * 3600 + 21 * 60 + 23 }, // 1:21:23, temporada 11 1 ao 4
+            { src: "https://drive.google.com/file/d/1vxJMpGv2ujgSheJJ4nWPeiEtuzJTOnVl/preview", duration: 3 * 3600 + 16 * 60 + 0 }, // 3:16:00, temporada 11 ep 5 ao 14
+            { src: "https://drive.google.com/file/d/1bpY4bXxy4UNl3aKZbKiYNQbfPoPZ-1ip/preview", duration: 1 * 3600 + 39 * 60 + 53 }, // 1:39:53, temporada 11 ep 15 ao 20
+            { src: "https://drive.google.com/file/d/1_Zz2ns8ZIefb4z5zA1-KZYuE24kb1xog/preview", duration: 1 * 3600 + 39 * 60 + 53 } // 1:39:53, temporada 11 ep 21 ao 24
+        ];
+
+        // Define a hora de início dos vídeos
+        const startTime = new Date("2024-05-28T11:10:00Z");
+
+        // Atualiza a seleção visual dos canais
+        const updateVisualSelection = () => {
+            channelItems.forEach((item, index) => {
+                if (index === currentIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        };
+
+        // Obtém o vídeo atual com base no tempo decorrido desde o início
+        const getCurrentVideo = () => {
+            const now = new Date();
+            const elapsedTime = Math.floor((now - startTime) / 1000); // Tempo decorrido em segundos
+            const totalDuration = googleDriveVideos.reduce((acc, video) => acc + video.duration, 0);
+            const loopTime = elapsedTime % totalDuration;
+            let currentTime = 0;
+
+            for (let video of googleDriveVideos) {
+                currentTime += video.duration;
+                if (loopTime < currentTime) {
+                    const startOffset = loopTime - (currentTime - video.duration);
+                    return { src: video.src, startOffset, duration: video.duration - startOffset };
+                }
+            }
+        };
+
+        // Reproduz o vídeo do Google Drive
+        const playGoogleDriveVideo = () => {
+            const currentVideo = getCurrentVideo();
+            playerContainer.innerHTML = `
+                <iframe 
+                    id="current-video"
+                    src="${currentVideo.src}#t=${currentVideo.startOffset}" 
+                    width="100%" 
+                    height="100%" 
+                    allow="autoplay" 
+                    style="border:none;" 
+                    tabindex="0"></iframe>`;
+
+            currentPlayer = document.getElementById('current-video');
+            currentPlayer.focus(); // Define o foco no iframe após o carregamento
+        };
+
+        // Atualiza a fonte do vídeo com base na seleção do canal
+        const updateVideoSource = () => {
+            const selectedItem = channelItems[currentIndex];
+            const newSrc = selectedItem.getAttribute('data-src');
+            const newType = selectedItem.getAttribute('data-type');
+
+            stopCurrentPlayer();
+
+            if (newType === 'm3u8') {
+                playerContainer.innerHTML = '<video id="video-player" class="video-js vjs-default-skin" controls autoplay></video>';
+                currentPlayer = document.getElementById('video-player');
+                const videoJsPlayer = videojs(currentPlayer, {
+                    autoplay: true,
+                    controls: true,
+                    controlBar: {
+                        fadeIn: true,
+                        fadeOut: true
+                    },
+                    fluid: true
+                });
+                videoJsPlayer.src({ type: 'application/x-mpegURL', src: newSrc });
+                videoJsPlayer.play();
+                isGoogleDriveVideoSelected = false;
+            } else if (newType === 'iframe') {
+                playGoogleDriveVideo();
+                isGoogleDriveVideoSelected = true;
+            }
+        };
+
+        // Para o player atual
+        const stopCurrentPlayer = () => {
+            if (currentPlayer) {
+                if (currentPlayer.tagName.toLowerCase() === 'video') {
+                    const videoJsPlayer = videojs(currentPlayer);
+                    videoJsPlayer.dispose();
+                } else if (currentPlayer.tagName.toLowerCase() === 'iframe') {
+                    currentPlayer.remove();
+                }
+            }
+        };
+
+        // Inicia o tempo limite para fechar a lista de canais
+        const startCloseListTimeout = () => {
+            clearTimeout(closeListTimeout);
+            closeListTimeout = setTimeout(() => {
+                channelList.style.left = '-300px';
+            }, 4000);
+        };
+
+        // Carrega a programação EPG para o canal selecionado
+        const loadEPG = (channel) => {
+            fetch('epg.json')
+                .then(response => response.json())
+                .then(data => {
+                    epgList.innerHTML = '';
+                    if (data[channel]) {
+                        data[channel].forEach(program => {
+                            const li = document.createElement('li');
+                            li.textContent = `${program.time} - ${program.title}`;
+                            epgList.appendChild(li);
+                        });
+                    } else {
+                        const li = document.createElement('li');
+                        li.textContent = 'No programming information available';
+                        epgList.appendChild(li);
+                    }
+                })
+                .catch(error => console.error('Error fetching EPG data:', error));
+        };
+
+        // Atualiza as informações do programa
+        const updateProgramInfo = () => {
+            fetch('epg.json')
+                .then(response => response.json())
+                .then(data => {
+                    channelItems.forEach(item => {
+                        const channel = item.getAttribute('data-channel');
+                        const programInfoElement = item.querySelector('.program-info');
+                        if (data[channel] && data[channel].length > 0) {
+                            programInfoElement.textContent = data[channel][0].title;
+                        } else {
+                            programInfoElement.textContent = '';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching EPG data:', error));
+        };
+
+        // Atualiza a seleção visual e as informações do programa ao carregar
+        updateVisualSelection();
+        updateProgramInfo();
+
+        // Função para abrir o menu de canais
+        const openChannelMenu = () => {
+            if (channelList.style.left === '0px') {
+                updateVideoSource();
+                channelList.style.left = '-300px';
+            } else if (isGoogleDriveVideoSelected && document.activeElement === currentPlayer) {
+                currentPlayer.focus(); // Garante que o foco está no iframe para reproduzir
+                document.activeElement.blur(); // Remove o foco para permitir que o iframe receba entrada
+                currentPlayer.contentWindow.document.querySelector('video').play();
+                isGoogleDriveVideoSelected = false;
+            } else {
+                channelList.style.left = '0';
+                startCloseListTimeout();
+            }
+        };
+
+        // Eventos de teclado para navegar e selecionar canais
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === 'Backspace') {
+                openChannelMenu();
+            } else if (e.key === 'ArrowDown') {
+                if (channelList.style.left === '0px') {
+                    currentIndex = (currentIndex + 1) % channelItems.length;
+                    updateVisualSelection();
+                    startCloseListTimeout();
+                }
+            } else if (e.key === 'ArrowUp') {
+                if (channelList.style.left === '0px') {
+                    currentIndex = (currentIndex - 1 + channelItems.length) % channelItems.length;
+                    updateVisualSelection();
+                    startCloseListTimeout();
+                }
+            } else if (e.key === 'ArrowRight') {
+                if (channelList.style.left === '0px') {
+                    epg.style.right = '0';
+                    const selectedChannel = channelItems[currentIndex].getAttribute('data-channel');
+                    loadEPG(selectedChannel);
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (epg.style.right === '0px') {
+                    epg.style.right = '-300px';
+                }
+            }
+        });
+
+        // Evento de clique para selecionar canais
+        channelItems.forEach((item, index) => {
+            item.addEventListener('click', () => {
+                currentIndex = index;
+                updateVisualSelection();
+                updateVideoSource();
+            });
+        });
+
+        // Evento de movimento do mouse para reiniciar o tempo limite para fechar a lista de canais
+        channelList.addEventListener('mousemove', startCloseListTimeout);
+    });
 </script>
+
+
+
+
+
+
+
+
+
+
 
     
 </body>
