@@ -564,7 +564,7 @@
 
         let currentPlayer = null;
         let isGoogleDriveVideoSelected = false;
-        let currentIndex = 0; // Inicializa o índice atual
+        let currentIndex = null; // Inicializa o índice atual como nulo
 
         // Lista de canais e vídeos
         const channelList = document.getElementById('channel-list');
@@ -723,8 +723,7 @@
                 .catch(error => console.error('Error fetching EPG data:', error));
         };
 
-        // Atualiza a seleção visual e as informações do programa ao carregar
-        updateVisualSelection();
+        // Atualiza as informações do programa ao carregar
         updateProgramInfo();
 
         // Função para abrir o menu de canais
@@ -749,13 +748,13 @@
                 openChannelMenu();
             } else if (e.key === 'ArrowDown') {
                 if (channelList.style.left === '0px') {
-                    currentIndex = (currentIndex + 1) % channelItems.length;
+                    currentIndex = (currentIndex === null) ? 0 : (currentIndex + 1) % channelItems.length;
                     updateVisualSelection();
                     startCloseListTimeout();
                 }
             } else if (e.key === 'ArrowUp') {
                 if (channelList.style.left === '0px') {
-                    currentIndex = (currentIndex - 1 + channelItems.length) % channelItems.length;
+                    currentIndex = (currentIndex === null) ? 0 : (currentIndex - 1 + channelItems.length) % channelItems.length;
                     updateVisualSelection();
                     startCloseListTimeout();
                 }
@@ -785,6 +784,7 @@
         channelList.addEventListener('mousemove', startCloseListTimeout);
     });
 </script>
+
 
 
 
